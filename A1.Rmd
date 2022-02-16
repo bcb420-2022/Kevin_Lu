@@ -128,19 +128,132 @@ any(gene_symbols == "")
 any(is.na(gene_symbols))
 ```
 
-## Clean as necessary
+## 4. Clean as necessary
 
-Remove outliers if there really are measurement errors
+From lecture 4, according to the `edgeR` protocol, it is recommended to remove
+features with insufficient reads. In this experiment, there are six replicates
+per group (alveolar and bronchial cells with and without spike protein).
 
-## Apply normalization
+How many genes would be kept if the ones without at least one read per million
+in six samples were removed?
+```{r}
+sum(rowSums(counts > 1) >= 6)
+```
 
-## Interpretation
+About two-thirds of genes are dropped. However, some Ensembl IDs still do not
+have corresponding symbols.
 
-## Citations
+```{r}
+filtered_counts <- counts[rowSums(counts > 1) >= 6, ]
+filtered_symbols <- ensg2hgnc$hgnc_symbol[match(rownames(filtered_counts), ensg2hgnc$ensembl_gene_id)]
+any(filtered_symbols == "")
+any(is.na(filtered_symbols))
+```
+
+## 5. Apply normalization
+
+Per lecture 4, let's get box plots of these CPMs pre-normalization.
+
+```{r}
+data2plot <- log2(filtered_counts)
+boxplot(data2plot, xlab = "Samples", ylab = "log2 CPM", 
+        las = 2, cex = 0.5, cex.lab = 0.5,
+        cex.axis = 0.5, main = "GSE185657 samples pre-normalization")
+#draw the median on each box plot
+abline(h = median(apply(data2plot, 2, median)), col = "green", lwd = 0.6, lty = "dashed")
+```
+Even after cleaning, some samples still have 0 CPM for a feature, which results
+in -Inf logarithms for the plot.
+
+As for density, again following the lecture slides:
+
+```{r}
+counts_density <- apply(log2(filtered_counts), 2, density)
+#calculate the limits across all the samples
+xlim <- 0; ylim <- 0
+for (i in 1:length(counts_density)) {
+  xlim <- range(c(xlim, counts_density[[i]]$x)); 
+  ylim <- range(c(ylim, counts_density[[i]]$y))
+}
+cols <- rainbow(length(counts_density))
+ltys <- rep(1, length(counts_density))
+#plot the first density plot to initialize the plot
+plot(counts_density[[1]], xlim=xlim, ylim=ylim, type="n", 
+     ylab="Smoothing density of log2-CPM", 
+     main="GSE185657 samples pre-normalization", cex.lab = 0.85)
+#plot each line
+for (i in 1:length(counts_density)) 
+  lines(counts_density[[i]], col=cols[i], lty=ltys[i])
+#create legend
+legend("topright", colnames(data2plot),  
+       col=cols, lty=ltys, cex=0.75, 
+       border ="blue",  text.col = "green4", 
+       merge = TRUE, bg = "gray90")
+```
+This looks kind of funny.
+
+Since we are already using `edgeR` for this RNA-Seq dataset, let's apply TMM
+normalization to the filtered CPMs.
+
+```{r}
+groups <- gsub("\\d", "", colnames(filtered_counts))
+d <- edgeR::DGEList(filtered_counts, group = groups)
+d <- edgeR::calcNormFactors(d)
+normalized_counts <- edgeR::cpm(d)
+```
+
+```{r}
+data2plot <- log2(normalized_counts)
+boxplot(data2plot, xlab = "Samples", ylab = "log2 CPM", 
+        las = 2, cex = 0.5, cex.lab = 0.5,
+        cex.axis = 0.5, main = "GSE185657 samples post-normalization")
+#draw the median on each box plot
+abline(h = median(apply(data2plot, 2, median)), col = "green", lwd = 0.6, lty = "dashed")
+```
+
+```{r}
+counts_density <- apply(log2(normalized_counts), 2, density)
+#calculate the limits across all the samples
+xlim <- 0; ylim <- 0
+for (i in 1:length(counts_density)) {
+  xlim <- range(c(xlim, counts_density[[i]]$x)); 
+  ylim <- range(c(ylim, counts_density[[i]]$y))
+}
+cols <- rainbow(length(counts_density))
+ltys <- rep(1, length(counts_density))
+#plot the first density plot to initialize the plot
+plot(counts_density[[1]], xlim=xlim, ylim=ylim, type="n", 
+     ylab="Smoothing density of log2-CPM", 
+     main="GSE185657 samples post-normalization", cex.lab = 0.85)
+#plot each line
+for (i in 1:length(counts_density)) 
+  lines(counts_density[[i]], col=cols[i], lty=ltys[i])
+#create legend
+legend("topright", colnames(data2plot),  
+       col=cols, lty=ltys, cex=0.75, 
+       border ="blue",  text.col = "green4", 
+       merge = TRUE, bg = "gray90")
+```
+
+## 6. Interpretation
+
+Most of these were implicitly addressed above.
+
+**What are the control and test conditions of the dataset?**
+**Why is the dataset of interest to you?**
+**Were there expression values that were not unique for specific genes? How did you handle these?**
+**Were there expression values that could not be mapped to current HUGO symbols?**
+**How many outliers were removed?**
+**How did you handle replicates?**
+**What is the final coverage of your dataset?**
+
+## 7. Citations
 
 Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708014/)
 
 ```{r}
 citation("GEOmetadb")
 citation("GEOquery")
+citation("biomaRt")
+citation("edgeR")
 ```
