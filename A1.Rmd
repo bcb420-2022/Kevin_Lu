@@ -1,0 +1,146 @@
+---
+title: "BCB420 Assignment 1 (Kevin Lu)"
+output:
+  html_document:
+    df_print: paged
+---
+
+I'll be using a dataset studying the effect of SARS-CoV-2 spike proteins on
+human lung cells ([GSE185657](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185657)).
+COVID-19 continues to be the topic on everybody's minds after two years, so I
+thought I would analyze a dataset related to the virus causing it.
+
+## 1. Download from GEO.
+
+```{r}
+library(GEOmetadb)
+library(GEOquery)
+```
+Download the metadata GEO series, or load from disk if already downloaded.
+
+```{r}
+if (!file.exists("GSE185657.rds")) {
+  gse <- getGEO("GSE185657")
+  saveRDS("GSE185657.rds")
+} else {
+  gse <- readRDS("GSE185657.rds") 
+}
+```
+
+There are 24 samples in this series.
+```{r}
+length(GSMList(gse))
+```
+
+The supplementary tarball for this dataset contains the raw counts, distributed
+across one file for each sample. We can construct the counts matrix since all
+files have the same length and the same Ensembl gene IDs in the same order.
+
+```{r}
+if (!file.exists("GSE185657_RAW.tar")) {
+  files <- getGEOSuppFiles("GSE185657", makeDirectory=FALSE)
+  target <- rownames(files[1])
+} else{
+  target <- "./GSE185657_RAW.tar"
+}
+contents <- untar(target, list=TRUE)
+contents
+```
+
+For some reason, instead of a compressed tarball, the authors compressed each
+_individual_ file and then combined them into one archive. Extract each sample.
+```{r, results='hide'}
+# Remove all extracted files to reperform the extraction and decompression
+if (!file.exists("GSM5621226_A_C1.txt")) {
+  untar(target)
+  lapply(contents, gunzip)
+}
+```
+
+Finally, construct the counts matrix.
+```{r}
+targets <- gsub(".gz$", "", contents)
+raw_list <- lapply(targets, read.delim)
+genes <- raw_list[[1]]$Ensembl_gene_ID
+samples <- sapply(raw_list, function (sample) colnames(sample)[2])
+counts <- sapply(raw_list, function(sample) sample[[2]])
+rownames(counts) <- genes
+colnames(counts) <- samples
+```
+
+## 2. Assess
+
+Here are some details regarding the conditions of the experiment and overview
+statistics on the data.
+
+```{r}
+Meta(gse)$title
+```
+
+```{r}
+Meta(gse)$overall_design
+```
+
+```{r}
+Meta(gse)$last_update_date
+```
+
+```{r}
+Meta(gse)$summary
+```
+
+Confirm the prior assertions regarding the structure of the raw files.
+```{r}
+all(sapply(raw_list, function(sample) all.equal(genes, sample$Ensembl_gene_ID)))
+```
+
+```{r}
+length(unique(genes)) == length(genes)
+```
+
+45368 genes were measured across 24 samples. According to the authors, this is
+an RNA-Seq dataset sequenced with Illumina NextSeq 500. The recorded values are
+CPM values, mapped to the GRCh38 genome assembly.
+
+```{r}
+dim(counts)
+```
+
+```{r}
+knitr::kable(head(counts), format="html")
+```
+
+## 3. Map to HUGO gene symbols
+
+Conveniently, we already have a unique list of GRCh38 Ensembl gene IDs for this
+dataset. We can get the gene symbols with `biomaRt`, which might be more helpful
+for human interpretation.
+
+```{r}
+GRCh38 <- biomaRt::useEnsembl("genes", "hsapiens_gene_ensembl")
+ensg2hgnc <- biomaRt::getBM(c("ensembl_gene_id", "hgnc_symbol"), mart=GRCh38)
+```
+
+There isn't necessarily a gene symbol for a particular Ensembl ID.
+```{r}
+gene_symbols <- ensg2hgnc$hgnc_symbol[match(genes, ensg2hgnc$ensembl_gene_id)]
+any(gene_symbols == "")
+any(is.na(gene_symbols))
+```
+
+## Clean as necessary
+
+Remove outliers if there really are measurement errors
+
+## Apply normalization
+
+## Interpretation
+
+## Citations
+
+Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708014/)
+
+```{r}
+citation("GEOmetadb")
+citation("GEOquery")
+```
