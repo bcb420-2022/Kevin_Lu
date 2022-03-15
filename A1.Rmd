@@ -21,7 +21,7 @@ Download the metadata GEO series, or load from disk if already downloaded.
 ```{r}
 if (!file.exists("GSE185657.rds")) {
   gse <- getGEO("GSE185657")
-  saveRDS("GSE185657.rds")
+  saveRDS(gse, "GSE185657.rds")
 } else {
   gse <- readRDS("GSE185657.rds") 
 }
@@ -233,6 +233,10 @@ legend("topright", colnames(data2plot),
        col=cols, lty=ltys, cex=0.75, 
        border ="blue",  text.col = "green4", 
        merge = TRUE, bg = "gray90")
+```
+
+```{r}
+limma::plotMDS(d, labels=colnames(normalized_counts), col = c("darkgreen", "blue", "orange", "red")[factor(groups)])
 ```
 
 ## 6. Interpretation
