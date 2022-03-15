@@ -1,0 +1,42 @@
+---
+title: "Differential gene expression and preliminary ORA on GSE185657"
+subtitle: "BCB420 Assignment 2"
+author: "Kevin Lu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+bibliography: A2.bib
+csl: biomed-central.csl
+---
+
+## Differential gene expression
+
+1. Calculate p-values for each of the genes in your expression set. How many genes were significantly differentially expressed? What thresholds did you use and why?
+1. Multiple hypothesis testing - correct your p-values using a multiple hypothesis correction method. Which method did you use? And Why? How many genes passed correction?
+1. Show the amount of differentially expressed genes using an MA Plot or a Volcano plot. Highlight genes of interest.
+1. Visualize your top hits using a heatmap. Do you conditions cluster together? Explain why or why not.
+
+## Thresholded over-representation analysis
+
+1. Which method did you choose and why?
+1. What annotation data did you use and why? What version of the annotation are you using?
+1. How many genesets were returned with what thresholds?
+1. Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?
+
+## Interpretation
+
+1. Do the over-representation results support conclusions or mechanism discussed in the original paper?
+1. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.
+
+## References
+
+Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://pubmed.ncbi.nlm.nih.gov/34960806/)
+
+<div id="refs"></div>
+
+## Journal
+
+[GitHub wiki](https://github.com/bcb420-2022/Kevin_Lu/wiki/Assignment-2)
