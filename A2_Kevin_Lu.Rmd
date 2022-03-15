@@ -169,18 +169,82 @@ visually discernible.
 ## Thresholded over-representation analysis
 
 1. Which method did you choose and why?
-1. What annotation data did you use and why? What version of the annotation are you using?
-1. How many genesets were returned with what thresholds?
-1. Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?
+
+I'm choosing [g:Profiler](https://biit.cs.ut.ee/gprofiler/gost) due to familiarity and convenience.
+
+2. What annotation data did you use and why? What version of the annotation are you using?
+
+I can use the same sets of pathways as the homework as they are very relevant to
+the behaviour being studied, which is the cellular response to the COVID spike protein.
+I'll be using the latest version available from the g:Profiler site.
+
+- GO biological process (GO:BP)
+- Reactome (REAC)
+- WikiPathways (WP)
+
+3. How many genesets were returned with what thresholds?
+
+Using the same p-values as before...
+
+Up-regulated:
+```{r}
+sum(output_hits$P.Value < 0.05 & output_hits$logFC > 0)
+```
+
+Down-regulated
+```{r}
+sum(output_hits$P.Value < 0.05 & output_hits$logFC < 0)
+```
+
+```{r}
+upreg_ensg <- output_hits$Row.names[output_hits$P.Value < 0.05 & output_hits$logFC > 0]
+upreg_hgnc <- output_hits$gene[output_hits$P.Value < 0.05 & output_hits$logFC > 0]
+downreg_ensg <- output_hits$Row.names[output_hits$P.Value < 0.05 & output_hits$logFC < 0]
+downreg_hgnc <- output_hits$gene[output_hits$P.Value < 0.05 & output_hits$logFC < 0]
+write.table(upreg_ensg, file = "upreg_ensg.txt", sep="\n", row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(upreg_hgnc, file = "upreg_hgnc.txt", sep="\n", row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(downreg_ensg, file = "downreg_ensg.txt", sep="\n", row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(downreg_hgnc, file = "downreg_hgnc.txt", sep="\n", row.names = FALSE,col.names = FALSE,quote = FALSE)
+```
+
+4. Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?
+
+Following the same steps as the homework, choosing the aforementioned data sources
+and choosing "Benjamini-Hochberg FDR" for consistency with the prior correction method,
+here are the top results of the query.
+
+Up-regulated only:
+- GO:BP: defense response to virus, defense response to symbiont, response to virus
+- REAC: Interferon alpha/beta signaling
+- WP: Type II interferon signaling (IFNG)
+
+Down-regulated only:
+- GO-BP: cytoplasmic translation
+- REAC: Eukaryotic Translation Elongation
+- WP: Cytoplasmic ribosomal proteins
+
+Both:
+- GO-BP: cellular macromolecule metabolic process
+- REAC: Eukaryotic Translation Elongation
+- WP: Cytoplasmic ribosomal proteins
+
+Since the down-regulated list is larger, I think its influence dominated the combined query.
 
 ## Interpretation
 
 1. Do the over-representation results support conclusions or mechanism discussed in the original paper?
-1. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.
+
+Yes, the authors say that they "observed a typical anti-viral response in the bronchial model whereas a pro-fibrotic response in the alveolar model", which is consistent with the identified pathways.
+
+2. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.
+
+Not answered due to time.
 
 ## References
 
 Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://pubmed.ncbi.nlm.nih.gov/34960806/)
+
+Uku Raudvere, Liis Kolberg, Ivan Kuzmin, Tambet Arak, Priit Adler, Hedi Peterson, Jaak Vilo: g:Profiler: a web server for functional enrichment analysis and conversions of gene lists (2019 update) Nucleic Acids Research 2019; doi:10.1093/nar/gkz369
 
 <div id="refs"></div>
 

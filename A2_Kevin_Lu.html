@@ -753,21 +753,59 @@ heatmap</code></pre>
 <h2>Thresholded over-representation analysis</h2>
 <ol style="list-style-type: decimal">
 <li>Which method did you choose and why?</li>
+</ol>
+<p>I’m choosing <a href="https://biit.cs.ut.ee/gprofiler/gost">g:Profiler</a> due to familiarity and convenience.</p>
+<ol start="2" style="list-style-type: decimal">
 <li>What annotation data did you use and why? What version of the annotation are you using?</li>
+</ol>
+<p>I can use the same sets of pathways as the homework as they are very relevant to the behaviour being studied, which is the cellular response to the COVID spike protein. I’ll be using the latest version available from the g:Profiler site.</p>
+<ul>
+<li>GO biological process (<a href="GO:BP" class="uri">GO:BP</a>)</li>
+<li>Reactome (REAC)</li>
+<li>WikiPathways (WP)</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
 <li>How many genesets were returned with what thresholds?</li>
+</ol>
+<p>Using the same p-values as before…</p>
+<p>Up-regulated:</p>
+<pre class="r"><code>sum(output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &gt; 0)</code></pre>
+<pre><code>## [1] 349</code></pre>
+<p>Down-regulated</p>
+<pre class="r"><code>sum(output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &lt; 0)</code></pre>
+<pre><code>## [1] 461</code></pre>
+<pre class="r"><code>upreg_ensg &lt;- output_hits$Row.names[output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &gt; 0]
+upreg_hgnc &lt;- output_hits$gene[output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &gt; 0]
+downreg_ensg &lt;- output_hits$Row.names[output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &lt; 0]
+downreg_hgnc &lt;- output_hits$gene[output_hits$P.Value &lt; 0.05 &amp; output_hits$logFC &lt; 0]
+write.table(upreg_ensg, file = &quot;upreg_ensg.txt&quot;, sep=&quot;\n&quot;, row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(upreg_hgnc, file = &quot;upreg_hgnc.txt&quot;, sep=&quot;\n&quot;, row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(downreg_ensg, file = &quot;downreg_ensg.txt&quot;, sep=&quot;\n&quot;, row.names = FALSE,col.names = FALSE,quote = FALSE)
+write.table(downreg_hgnc, file = &quot;downreg_hgnc.txt&quot;, sep=&quot;\n&quot;, row.names = FALSE,col.names = FALSE,quote = FALSE)</code></pre>
+<ol start="4" style="list-style-type: decimal">
 <li>Run the analysis using the up-regulated set of genes, and the down-regulated set of genes separately. How do these results compare to using the whole list (i.e all differentially expressed genes together vs. the up-regulated and down regulated differentially expressed genes separately)?</li>
 </ol>
+<p>Following the same steps as the homework, choosing the aforementioned data sources and choosing “Benjamini-Hochberg FDR” for consistency with the prior correction method, here are the top results of the query.</p>
+<p>Up-regulated only: - <a href="GO:BP" class="uri">GO:BP</a>: defense response to virus, defense response to symbiont, response to virus - REAC: Interferon alpha/beta signaling - WP: Type II interferon signaling (IFNG)</p>
+<p>Down-regulated only: - GO-BP: cytoplasmic translation - REAC: Eukaryotic Translation Elongation - WP: Cytoplasmic ribosomal proteins</p>
+<p>Both: - GO-BP: cellular macromolecule metabolic process - REAC: Eukaryotic Translation Elongation - WP: Cytoplasmic ribosomal proteins</p>
+<p>Since the down-regulated list is larger, I think its influence dominated the combined query.</p>
 </div>
 <div id="interpretation" class="section level2">
 <h2>Interpretation</h2>
 <ol style="list-style-type: decimal">
 <li>Do the over-representation results support conclusions or mechanism discussed in the original paper?</li>
+</ol>
+<p>Yes, the authors say that they “observed a typical anti-viral response in the bronchial model whereas a pro-fibrotic response in the alveolar model,” which is consistent with the identified pathways.</p>
+<ol start="2" style="list-style-type: decimal">
 <li>Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your results.</li>
 </ol>
+<p>Not answered due to time.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
 <p>Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/34960806/">34960806</a></p>
+<p>Uku Raudvere, Liis Kolberg, Ivan Kuzmin, Tambet Arak, Priit Adler, Hedi Peterson, Jaak Vilo: g:Profiler: a web server for functional enrichment analysis and conversions of gene lists (2019 update) Nucleic Acids Research 2019; <a href="doi:10.1093/nar/gkz369" class="uri">doi:10.1093/nar/gkz369</a></p>
 <div id="refs" class="references csl-bib-body">
 <div id="ref-rmarkdown" class="csl-entry">
 1. Allaire J, Xie Y, McPherson J, Luraschi J, Ushey K, Atkins A, et al. Rmarkdown: Dynamic documents for r. 2021.
