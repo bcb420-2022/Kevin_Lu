@@ -1,0 +1,15 @@
+name: Knit R markdown
+on:
+  push:
+    branches:
+      - main
+jobs:
+  knit:
+    runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - name: Knit
+      run: |
+        docker run --rm -it -v "$(pwd)":/home/rstudio/projects --user rstudio \
+          risserlin/bcb420-base-image /usr/local/bin/R -e \
+          "rmarkdown::render('/home/rstudio/projects/A2_Kevin_Lu.Rmd',output_file='/home/rstudio/projects/A2_Kevin_Lu.html')"
