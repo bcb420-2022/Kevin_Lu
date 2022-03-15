@@ -143,7 +143,28 @@ sum(output_hits$adj.P.Val < 0.05)
 ```
 
 3. Show the amount of differentially expressed genes using an MA Plot or a Volcano plot. Highlight genes of interest.
+
+```{r}
+limma::plotMA(minimal_set, status=output_hits$P.Value < 0.05, main="Genes with differential expression p-value < 0.05")
+```
+
 4. Visualize your top hits using a heatmap. Do you conditions cluster together? Explain why or why not.
+
+```{r}
+top_hits <- output_hits$Row.names[output_hits$P.Value < 0.05]
+heatmap_matrix_tophits <- t(scale(t(normalized_counts[which(rownames(normalized_counts) %in% top_hits),])))
+heatmap_col <- circlize::colorRamp2(c(min(heatmap_matrix_tophits), 0, max(heatmap_matrix_tophits)), c("blue", "white", "red"))
+heatmap <- ComplexHeatmap::Heatmap(as.matrix(heatmap_matrix_tophits),
+  cluster_rows = TRUE, show_row_dend = TRUE,
+  cluster_columns = FALSE,show_column_dend = FALSE,
+  col=heatmap_col,show_column_names = TRUE,
+  show_row_names = FALSE,show_heatmap_legend = TRUE)
+heatmap
+```
+
+The conditions are definitely clustering together. In this heatmap, samples of the
+same cell type and exposure are adjacent and the boundary between groups is
+visually discernible.
 
 ## Thresholded over-representation analysis
 
