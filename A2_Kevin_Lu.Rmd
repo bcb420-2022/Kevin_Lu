@@ -13,6 +13,15 @@ csl: biomed-central.csl
 nocite: "@*"
 ---
 
+I'm using the same dataset from A1, ["Differential effect of SARS-CoV-2 spike glycoprotein 1 on human bronchial and alveolar lung mucosa models: Implications on pathogenicity."](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185657),
+published December 13, 2021. The corresponding publication can be found on GEO and in the [references](#references).
+
+This experiment compares the expression response of human alveolar and bronchial
+cells to SARS-CoV-2 spike protein through RNA sequencing. Figure 1 from the paper
+shows the experimental design.
+
+![Figure 1. Experiment design. Rahman et al, 2021.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708014/bin/viruses-13-02537-g001.jpg)
+
 ```{r, include=FALSE}
 # From A1
 library(GEOmetadb)
@@ -75,8 +84,8 @@ if (!file.exists("GSE185657_normalized_CPM.rds")) {
 ## Differential gene expression
 
 Recall the design of this experiment. There are 24 samples. **A** samples are
-alveolar cells and **B** samples are bronchial cells. **_Sp** samples were exposed
-a SARS-CoV-2 spike protein and **_C** samples were controls.
+alveolar cells and **B** samples are bronchial cells. **\_Sp** samples were exposed
+a SARS-CoV-2 spike protein and **\_C** samples were controls.
 
 ```{r}
 knitr::kable(t(normalized_counts[1:3,]), type="html")
