@@ -10,7 +10,68 @@ output:
     toc_float: true
 bibliography: A2.bib
 csl: biomed-central.csl
+nocite: "@*"
 ---
+
+```{r, include=FALSE}
+# From A1
+library(GEOmetadb)
+library(GEOquery)
+# Download the metadata GEO series, or load from disk if already downloaded
+if (!file.exists("GSE185657.rds")) {
+  gse <- getGEO("GSE185657")
+  saveRDS(gse, "GSE185657.rds")
+} else {
+  gse <- readRDS("GSE185657.rds") 
+}
+# Download supplementary tarball
+if (!file.exists("GSE185657_RAW.tar")) {
+  files <- getGEOSuppFiles("GSE185657", makeDirectory=FALSE)
+  target <- rownames(files[1])
+} else{
+  target <- "./GSE185657_RAW.tar"
+}
+contents <- untar(target, list=TRUE)
+if (!file.exists("GSE185657_normalized_CPM.rds")) {
+  # Remove all extracted files to reperform the extraction and decompression
+  if (!file.exists("GSM5621226_A_C1.txt")) {
+    untar(target)
+    lapply(contents, gunzip)
+  }
+  # Construct the raw counts matrix
+  targets <- gsub(".gz$", "", contents)
+  raw_list <- lapply(targets, read.delim)
+  genes <- raw_list[[1]]$Ensembl_gene_ID
+  samples <- sapply(raw_list, function (sample) colnames(sample)[2])
+  counts <- sapply(raw_list, function(sample) sample[[2]])
+  rownames(counts) <- genes
+  colnames(counts) <- samples
+  saveRDS(counts, "GSE185657_raw_CPM.rds")
+  # Map to HUGO gene symbols
+  GRCh38 <- biomaRt::useEnsembl("genes", "hsapiens_gene_ensembl")
+  ensg2hgnc <- biomaRt::getBM(c("ensembl_gene_id", "hgnc_symbol"), mart=GRCh38)
+  gene_symbols <- ensg2hgnc$hgnc_symbol[match(genes, ensg2hgnc$ensembl_gene_id)]
+  saveRDS(gene_symbols, "GSE185657_raw_symbols.rds")
+  # Clean data based on read threshold
+  filtered_counts <- counts[rowSums(counts > 1) >= 6, ]
+  filtered_symbols <- ensg2hgnc$hgnc_symbol[match(rownames(filtered_counts), ensg2hgnc$ensembl_gene_id)]
+  saveRDS(filtered_counts, "GSE185657_filtered_CPM.rds")
+  saveRDS(filtered_symbols, "GSE185657_filtered_symbols.rds")
+  # Apply TMM normalization to cleaned CPMs
+  groups <- gsub("\\d", "", colnames(filtered_counts))
+  d <- edgeR::DGEList(filtered_counts, group = groups)
+  d <- edgeR::calcNormFactors(d)
+  normalized_counts <- edgeR::cpm(d)
+  saveRDS(normalized_counts, "GSE185657_normalized_CPM.rds")
+} else {
+  counts <- readRDS("GSE185657_raw_CPM.rds")
+  gene_symbols <- readRDS("GSE185657_raw_symbols.rds")
+  filtered_counts <- readRDS("GSE185657_filtered_CPM.rds")
+  filtered_symbols <- readRDS("GSE185657_filtered_symbols.rds")
+  normalized_counts <- readRDS("GSE185657_normalized_CPM.rds")
+}
+```
+
 
 ## Differential gene expression
 
