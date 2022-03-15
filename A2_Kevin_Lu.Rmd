@@ -72,13 +72,69 @@ if (!file.exists("GSE185657_normalized_CPM.rds")) {
 }
 ```
 
-
 ## Differential gene expression
 
+Recall the design of this experiment. There are 24 samples. **A** samples are
+alveolar cells and **B** samples are bronchial cells. **_Sp** samples were exposed
+a SARS-CoV-2 spike protein and **_C** samples were controls.
+
+```{r}
+knitr::kable(t(normalized_counts[1:3,]), type="html")
+```
+
+Construct the design matrix according to the experiment design for differential
+expression analysis.
+
+```{r}
+design <- data.frame(lapply(colnames(normalized_counts), function(x) {
+  gsub("\\d", "", unlist(strsplit(x, "_")))
+}))
+colnames(design) <- colnames(normalized_counts)
+rownames(design) <- c("cell_type", "exposure")
+design <- data.frame(t(design))
+knitr::kable(design, type="html")
+```
+
+Now we can answer the first two questions for this section:
+
 1. Calculate p-values for each of the genes in your expression set. How many genes were significantly differentially expressed? What thresholds did you use and why?
-1. Multiple hypothesis testing - correct your p-values using a multiple hypothesis correction method. Which method did you use? And Why? How many genes passed correction?
-1. Show the amount of differentially expressed genes using an MA Plot or a Volcano plot. Highlight genes of interest.
-1. Visualize your top hits using a heatmap. Do you conditions cluster together? Explain why or why not.
+2. Multiple hypothesis testing - correct your p-values using a multiple hypothesis correction method. Which method did you use? And Why? How many genes passed correction?
+
+I'll be using the _limma_ package, since_lmFit_ directly supports accounting for
+multiple confounders, which we have in this dataset. Following the approach in
+lecture, using Benjamini-Hochberg correction for multiple hypothesis testing since
+it is less stringent:
+
+```{r}
+design_model <- model.matrix(~ design$cell_type + design$exposure)
+minimal_set <- ExpressionSet(normalized_counts)
+fit <- limma::lmFit(minimal_set, design_model)
+fit2 <- limma::eBayes(fit, trend=TRUE)
+topfit <- limma::topTable(fit2, coef=ncol(design_model), adjust.method="BH", number=nrow(normalized_counts))
+# Add the gene symbols
+output_hits <- merge(
+  data.frame(gene = filtered_symbols, row.names = rownames(normalized_counts)),
+  topfit,
+  by=0,
+  all=TRUE
+)
+# Sort by unadjusted p-value
+output_hits <- output_hits[order(output_hits$P.Value),]
+knitr::kable(output_hits[1:10,], type="html", row.names=FALSE)
+```
+
+Choose the standard significance threshold 0.05. How many genes were significantly differentially expressed? 
+```{r}
+sum(output_hits$P.Value < 0.05)
+```
+
+How many genes passed correction?
+```{r}
+sum(output_hits$adj.P.Val < 0.05)
+```
+
+3. Show the amount of differentially expressed genes using an MA Plot or a Volcano plot. Highlight genes of interest.
+4. Visualize your top hits using a heatmap. Do you conditions cluster together? Explain why or why not.
 
 ## Thresholded over-representation analysis
 
