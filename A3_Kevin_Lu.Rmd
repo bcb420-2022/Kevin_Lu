@@ -1,0 +1,57 @@
+---
+title: "Pathway and network analysis on GSE185657"
+subtitle: "BCB420 Assignment 3"
+author: "Kevin Lu"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+bibliography: A3.bib
+csl: biomed-central.csl
+nocite: "@*"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Non-thresholded Gene set Enrichment Analysis
+
+Conduct non-thresholded gene set enrichment analysis using the ranked set of genes from Assignment #2.
+
+1. What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.
+1. Summarize your enrichment results.
+1. How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?
+
+## Visualize your Gene set Enrichment Analysis in Cytoscape
+
+Using your results from your non-thresholded gene set enrichment analysis visualize your results in Cytoscape.
+
+1. Create an enrichment map - how many nodes and how many edges in the resulting map? What thresholds were used to create this map? Make sure to record all thresholds. Include a screenshot of your network prior to manual layout.
+1. Annotate your network - what parameters did you use to annotate the network. If you are using the default parameters make sure to list them as well.
+1. Make a publication ready figure - include this figure with proper legends in your notebook.
+1. Collapse your network to a theme network. What are the major themes present in this analysis? Do they fit with the model? Are there any novel pathways or themes?
+
+  - Present your results with the use of tables and screenshots. All figures should have appropriate figure legends.
+  - If using figures create a figures directory in your repo and make sure all references to the figures are relative in your Rmarkdown notebook.
+  
+## Interpretation and detailed view of results
+
+The most important aspect of the analysis is relating your results back to the initial data and question.
+
+1. Do the enrichment results support conclusions or mechanism discussed in the original paper? How do these results differ from the results you got from Assignment #2 thresholded methods
+1. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your result?
+
+Using your networks and results from the previous section add one of the following: (see Quercus)
+
+## References
+
+Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://pubmed.ncbi.nlm.nih.gov/34960806/)
+
+<div id="refs"></div>
+
+## Journal
+
+[GitHub wiki](https://github.com/bcb420-2022/Kevin_Lu/wiki/Assignment-3)

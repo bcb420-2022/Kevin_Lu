@@ -12,4 +12,4 @@ jobs:
       run: |
         docker run --rm -v "$(pwd)":/home/rstudio/projects \
           risserlin/bcb420-base-image /usr/local/bin/R -e \
-          "rmarkdown::render('/home/rstudio/projects/A2_Kevin_Lu.Rmd',output_file='/home/rstudio/projects/A2_Kevin_Lu.html')"
+          "rmarkdown::render('/home/rstudio/projects/A3_Kevin_Lu.Rmd',output_file='/home/rstudio/projects/A3_Kevin_Lu.html')"
