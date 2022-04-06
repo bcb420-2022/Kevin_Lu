@@ -255,14 +255,24 @@ actually related to the electron transport chain. The largest upregulated cluste
 is actually related to mitosis, which supports the authors' conclusion regarding
 a pro-fibrotic response in alveolar cells.
 
+### Additional evidence in the literature
 
-1. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your result?
+According to [Reactome (2010)](https://reactome.org/content/detail/R-HSA-913531), 
+interferons "are cytokines that play a central role in initiating immune responses,
+especially antiviral." A [2018 study by Qu et al](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6355081/)
+noted that mitochondria serve as "a signaling hub for the innate immune response
+and facilitate downstream signaling leading to [interferon] synthesis".
 
-Using your networks and results from the previous section add one of the following: (see Quercus)
+The samples in this experiment were treated with just SARS-CoV-2
+spike protein. It is well-known that the spike protein of SARS-CoV-2 is used as a target for
+many current vaccines, especially the [mRNA vaccines (CDC link)](https://www.cdc.gov/coronavirus/2019-ncov/vaccines/different-vaccines/mrna.html).
+The spike protein of coronaviruses in general has been [used as a target](https://www.nature.com/articles/nrmicro2090)
+for vaccines and treatments since well before the current global COVID-19 pandemic
+(Du et al. 2009). 
 
-### Dark matter
+### Dark matter analysis (option 3)
 
-This comes from the slides.
+This code comes from the lecture slides.
 
 ```{r}
 library(GSA)
@@ -300,9 +310,12 @@ for(i in 1:length(all_sig_enr_genesets)){
 genes_all_gs <- unique(unlist(genesets$genesets))
 ```
 
+How many significantly enriched genes are in the gene set?
 ```{r}
 length(genes_sig_enr_gs)
 ```
+
+#### Venn diagram of genes analyzed
 
 ```{r, results=FALSE, message=FALSE, warning=FALSE}
 if (!require(VennDiagram)) {
@@ -310,8 +323,6 @@ if (!require(VennDiagram)) {
 }
 library(VennDiagram)
 ```
-
-Dark matter overlaps
 
 ```{r}
 draw.triple.venn(
@@ -331,16 +342,19 @@ draw.triple.venn(
 )
 ```
 
+#### Top dark matter genes
 
-Top dark matter genes
+These are significantly differentially expressed but weren't in the annotation
+data source used. Note that none of these top hits are missing HGNC symbols.
+
 ```{r}
 genes_no_annotation <- setdiff(rnk$gene, genes_all_gs)
 ranked_gene_no_annotation <- rnk[which(rnk$gene %in% genes_no_annotation),]
 knitr::kable(ranked_gene_no_annotation[1:10,], type="html")
 ```
 
+#### Heatmap of significant genes not annotated to any pathway returned in the enrichment analysis
 
-heatmap of any significant genes that are not annotated to any of the pathways returned in the enrichment analysis.
 ```{r}
 top_hits <- output_hits$gene[output_hits$P.Value < 0.05]
 dark_matter <- setdiff(top_hits, genes_sig_enr_gs)
@@ -355,7 +369,8 @@ heatmap <- ComplexHeatmap::Heatmap(as.matrix(heatmap_matrix_tophits),
 heatmap
 ```
 
-heatmap of any significant genes that are not annotated to any pathways in entire set of pathways used for the analysis.
+#### Heatmap of significant genes not annotated to any pathway in the entire set of pathways
+
 ```{r}
 top_hits <- output_hits$gene[output_hits$P.Value < 0.05]
 dark_matter <- setdiff(top_hits, genes_all_gs)
@@ -372,6 +387,12 @@ heatmap
 
 ## References
 
+Centers for Disease Control and Prevention. Understanding mRNA COVID-19 Vaccines (2022). Retrieved 2022 Apr 5 from https://www.cdc.gov/coronavirus/2019-ncov/vaccines/different-vaccines/mrna.html
+
+Du, L., He, Y., Zhou, Y. et al. The spike protein of SARS-CoV — a target for vaccine and therapeutic development. Nat Rev Microbiol 7, 226–236 (2009). https://doi.org/10.1038/nrmicro2090
+
+Garapati, PV. Interferon Signaling (2010). Reactome. Retrieved 2022 Apr 5 from https://reactome.org/content/detail/R-HSA-913531
+
 GeneSetEnrichmentAnalysisWiki. Data formats. 2020. Retrieved 2022 Apr 5 from https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats
 
 Isserlin R. Enrichment Map Analysis Pipeline. 2020. Retrieved 2022 Apr 5 from https://baderlab.github.io/Cytoscape_workflows/EnrichmentMapPipeline/Protocol2_createEM.html
@@ -387,6 +408,8 @@ Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV
 Reimand J, Isserlin R, Voisin V, Kucera M, Tannus-Lopes C, Rostamianfar A, Wadi L, Meyer M, Wong J, Xu C, Merico D, Bader GD. Pathway enrichment analysis and visualization of omics data using g:Profiler, GSEA, Cytoscape and EnrichmentMap. Nat Protoc. 2019 Feb;14(2):482-517. doi: 10.1038/s41596-018-0103-9. PMID: [30664679](https://pubmed.ncbi.nlm.nih.gov/30664679/); PMCID: PMC6607905.
 
 Shannon P, Markiel A, Ozier O, Baliga NS, Wang JT, Ramage D, Amin N, Schwikowski B, Ideker T. Cytoscape: a software environment for integrated models of biomolecular interaction networks. Genome Res. 2003 Nov;13(11):2498-504. doi: 10.1101/gr.1239303. PMID: [14597658](https://pubmed.ncbi.nlm.nih.gov/14597658/); PMCID: PMC403769.
+
+Qu C, Zhang S, Wang W, Li M, Wang Y, van der Heijde-Mulder M, Shokrollahi E, Hakim MS, Raat NJH, Peppelenbosch MP, Pan Q. Mitochondrial electron transport chain complex III sustains hepatitis E virus replication and represents an antiviral target. FASEB J. 2019 Jan;33(1):1008-1019. doi: 10.1096/fj.201800620R. Epub 2018 Aug 2. PMID: 30070932; PMCID: PMC6355081.
 
 <div id="refs"></div>
 
