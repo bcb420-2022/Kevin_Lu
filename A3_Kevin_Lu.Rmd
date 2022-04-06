@@ -210,41 +210,52 @@ To make it more explicit from that command, the thresholds used are:
 - similaritycutoff = 0.375
 - coefficients = COMBINED
 
-### Initial enrichment map
-
-![Initial Cytoscape enrichment map](./cytoscape/initial.png)
-
-**Legend:**
+### Legend for all enrichment maps
 
 ![Legend for all enrichment maps](./cytoscape/legend.png)
+
+Click on any of the enrichment maps to enlarge them.
+
+### Initial enrichment map
+
+[![Initial Cytoscape enrichment map](./cytoscape/initial.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/initial.png)
 
 According to "Tools > Analyze Network", treating it as an undirected graph, there
 are 309 nodes and 1609 edges.
 
+### Manually-adjusted legible enrichment map
 
+[![Legible Cytoscape enrichment map](./cytoscape/spread.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/spread.png)
 
-default settings
-- clusterMaker
-- MCL Cluster
-- label: GS_DESCR
-- algorithm: WordCloud: Adjacent Words
-- max words per label: 3
-- min occurence: 1
-- adjacent bonus: 8
+### Annotated with clusters
 
-1. Create an enrichment map - how many nodes and how many edges in the resulting map? What thresholds were used to create this map? Make sure to record all thresholds. Include a screenshot of your network prior to manual layout.
-1. Annotate your network - what parameters did you use to annotate the network. If you are using the default parameters make sure to list them as well.
-1. Make a publication ready figure - include this figure with proper legends in your notebook.
-1. Collapse your network to a theme network. What are the major themes present in this analysis? Do they fit with the model? Are there any novel pathways or themes?
+Using AutoAnnotate on the entire network with largely default settings:
 
-  - Present your results with the use of tables and screenshots. All figures should have appropriate figure legends.
-  - If using figures create a figures directory in your repo and make sure all references to the figures are relative in your Rmarkdown notebook.
-  
+- prevent cluster overlap
+- use clusterMaker
+- **cluster algorithm:** MCL Cluster
+- **label column:** GS_DESCR
+- **label algorithm:** WordCloud: Adjacent Words
+- **max words per label:** 3
+- **minimum word occurence:** 1
+- **adjacent word bonus:** 8
+
+[![Annotated Cytoscape enrichment map](./cytoscape/theme.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/theme.png)
+
 ## Interpretation and detailed view of results
 
-The most important aspect of the analysis is relating your results back to the initial data and question.
+The enrichment results support the conclusions in the original paper and are very
+similar to the results from Assignment 2. The authors "observed a typical anti-viral
+response in the bronchial model and a pro-fibrotic response in the alveolar model."
+Like g:Profiler, GSEA also identifies interferon signaling and viral defence response
+as upregulated and metabolism and translation as downregulated. GSEA and the
+enrichment maps also indicate that the mitochondrial electron transport
+chain and steps of mitosis are affected. The largest downregulated cluster is
+actually related to the electron transport chain. The largest upregulated cluster
+is actually related to mitosis, which supports the authors' conclusion regarding
+a pro-fibrotic response in alveolar cells.
 
-1. Do the enrichment results support conclusions or mechanism discussed in the original paper? How do these results differ from the results you got from Assignment #2 thresholded methods
+
 1. Can you find evidence, i.e. publications, to support some of the results that you see. How does this evidence support your result?
 
 Using your networks and results from the previous section add one of the following: (see Quercus)
