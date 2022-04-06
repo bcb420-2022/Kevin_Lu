@@ -13,6 +13,15 @@ csl: biomed-central.csl
 nocite: "@*"
 ---
 
+I'm using the same dataset from prior assignments, ["Differential effect of SARS-CoV-2 spike glycoprotein 1 on human bronchial and alveolar lung mucosa models: Implications on pathogenicity."](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185657),
+published December 13, 2021. The corresponding publication can be found on GEO and in the [references](#references).
+
+This experiment compares the expression response of human alveolar and bronchial
+cells to SARS-CoV-2 spike protein through RNA sequencing. Figure 1 from the paper
+shows the experimental design.
+
+![Figure 1. Experiment design. Rahman et al, 2021.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708014/bin/viruses-13-02537-g001.jpg)
+
 ```{r, include=FALSE}
 # From A1
 library(GEOmetadb)
@@ -97,30 +106,71 @@ output_hits <- output_hits[order(output_hits$P.Value),]
 
 ## Non-thresholded Gene set Enrichment Analysis
 
-Conduct non-thresholded gene set enrichment analysis using the ranked set of genes from Assignment #2.
+I will be using GSEA 4.1.0 from Docker image `risserlin/em_base_image:version_with_bioc_3_13`
+per lectures and a prior homework. I will be using the current April release of a
+geneset from the Gary Bader lab for enrichment analysis, containing GO biological
+processes and pathways but no IEA,
+[`Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt`](https://download.baderlab.org/EM_Genesets/current_release/Human/symbol/Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt)
+
+This geneset uses HGNC symbols, so construct the ranked list for GSEA accordingly.
 
 ```{r}
 rnk <- output_hits[output_hits$gene != "" & !is.na(output_hits$gene),]
 rnk$rank <- -log10(rnk$P.Value) * sign(rnk$logFC)
-# https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#Ranked_Gene_Lists
+# See https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#Ranked_Gene_Lists
 write.table(rnk[,c("gene", "rank")], "GSEA_GSE185657.rnk", sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
 ```
 
-Downloaded `Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt`
-
-GSEA 4.1.0 from `risserlin/em_base_image:version_with_bioc_3_13`
+The following commands were run in a shell due to instabilility with RStudio in
+the Docker image used. The parameters match that used in lectures and the prior
+homework.
 
 ```console
-$ ./gsea-cli.sh GSEAPreRanked -gmx ../projects/Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt -rnk ../projects/GSEA_GSE185657.rnk -collapse false -nperm 1000 -scoring_scheme weighted -rpt_label A3 -plot_top_x 20 -rnd_seed 12345 -set_max 200 -set_min 15 -zip_report false -out ../projects/ > ../projects/gsea_output.txt
+host$ docker run --rm -it --user=rstudio -v $(pwd):/home/rstudio/projects risserlin/em_base_image:version_with_bioc_3_13 bash
+rstudio@container$ cd ~/GSEA_4.1.0
+rstudio@container$ ./gsea-cli.sh GSEAPreRanked -gmx ../projects/Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt -rnk ../projects/GSEA_GSE185657.rnk -collapse false -nperm 1000 -scoring_scheme weighted -rpt_label A3 -plot_top_x 20 -rnd_seed 12345 -set_max 200 -set_min 15 -zip_report false -out ../projects/ > ../projects/gsea_output
 ```
 
-1. What method did you use? What genesets did you use? Make sure to specify versions and cite your methods.
-1. Summarize your enrichment results.
-1. How do these results compare to the results from the thresholded analysis in Assignment #2. Compare qualitatively. Is this a straight forward comparison? Why or why not?
+### Enrichment results summary
 
-GSEA found fewer
-- upreg 312 vs 349
-- downreg 350 vs 461
+All results have been uploaded to [GitHub](https://github.com/bcb420-2022/Kevin_Lu/tree/main/A3.GseaPreranked.1649192025218)
+with the [main summary here](https://github.com/bcb420-2022/Kevin_Lu/blob/main/A3.GseaPreranked.1649192025218/index.html).
+They are transcribed below.
+
+312 gene sets are significantly upregulated at nominal pvalue < 5%. Top results:
+
+1. HALLMARK_INTERFERON_ALPHA_RESPONSE (MSIGDB)
+1. INTERFERON ALPHA BETA SIGNALING (REACTOME)
+1. HALLMARK_INTERFERON_GAMMA_RESPONSE (MSIGDB)
+1. DEFENSE RESPONSE TO SYMBIONT (GOBP)
+1. DEFENSE RESPONSE TO VIRUS (GOBP)
+
+350 gene sets are significantly downregulated at nominal pvalue < 5%. Top results:
+
+1. ELECTRON TRANSPORT CHAIN: OXPHOS SYSTEM IN MITOCHONDRIA (WIKIPATHWAYS)
+1. EUKARYOTIC TRANSLATION ELONGATION (REACTOME)
+1. SELENOCYSTEINE SYNTHESIS (REACTOME)
+1. FORMATION OF A POOL OF FREE 40S SUBUNITS (REACTOME)
+1. CYTOPLASMIC RIBOSOMAL PROTEINS (WIKIPATHWAYS)
+
+### Comparison with thresholded analysis from Assignment 2
+
+GSEA found fewer significantly enriched gene sets than differentially-expressed
+genes found via thresholded analysis at the same p-value of 0.05, however, this
+is not an appropriate comparison as we are comparing gene sets to genes.
+
+GSEA identified similar upregulated and downregulated pathways. The top hits for
+upregulated processes and pathways are also related to interferon signaling and
+the viral defence response, from two of the same data sources, Reactome and GO:BP.
+The top hits for downregulated processes and pathways concern metabolism and
+translation, from two of the same data sources, Reactome and WikiPathways. Some
+of the exact same processes and pathways appear in both lists.
+
+This qualititative comparison is not straightforward as I am not comparing the
+full lists, just the top results. Furthermore, the data sources used are different.
+MSigDB is only part of the source used for GSEA. The results from g:Profiler also
+included one query with the entire differentially-expressed gene list, which has
+no equivalent in GSEA.
 
 ## Visualize your Gene set Enrichment Analysis in Cytoscape
 
@@ -159,9 +209,133 @@ The most important aspect of the analysis is relating your results back to the i
 
 Using your networks and results from the previous section add one of the following: (see Quercus)
 
+### Dark matter
+
+This comes from the slides.
+
+```{r}
+library(GSA)
+capture.output(genesets <- GSA.read.gmt("Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt"),file="gsa_load.out")
+names(genesets$genesets) <- genesets$geneset.names
+#get all the GSEA directories
+gsea_directories <- list.files(pattern = "\\.GseaPreranked")
+gsea_dir <- gsea_directories[1]
+#get the gsea result files
+gsea_results_files <- list.files(path = gsea_dir, pattern = "gsea_report_*.*.tsv")
+#there should be 2 gsea results files
+enr_file1 <- read.table(file.path(gsea_dir,gsea_results_files[1]), 
+                      header = TRUE, sep = "\t", quote="\"",  
+                      stringsAsFactors = FALSE,row.names=1)
+enr_file2 <- read.table(file.path(gsea_dir,gsea_results_files[2]), 
+                      header = TRUE, sep = "\t", quote="\"",  
+                      stringsAsFactors = FALSE,row.names=1)
+#get the genes from the set of enriched pathways (no matter what threshold)
+all_enr_genesets<- c(rownames(enr_file1), rownames(enr_file2))
+genes_enr_gs <- c()
+for(i in 1:length(all_enr_genesets)){
+  current_geneset <- unlist(genesets$genesets[which(genesets$geneset.names %in% all_enr_genesets[i])]) 
+  genes_enr_gs <- union(genes_enr_gs, current_geneset)
+}
+FDR_threshold <- 0.001
+#get the genes from the set of enriched pathways (no matter what threshold)
+all_sig_enr_genesets<- c(rownames(enr_file1)[
+  which(enr_file1[,"FDR.q.val"]<=FDR_threshold)],
+rownames(enr_file2)[which(enr_file2[,"FDR.q.val"]<=FDR_threshold)])
+genes_sig_enr_gs <- c()
+for(i in 1:length(all_sig_enr_genesets)){
+  current_geneset <- unlist(genesets$genesets[which(genesets$geneset.names %in% all_sig_enr_genesets[i])])
+  genes_sig_enr_gs <- union(genes_sig_enr_gs, current_geneset)
+}
+genes_all_gs <- unique(unlist(genesets$genesets))
+```
+
+```{r}
+length(genes_sig_enr_gs)
+```
+
+```{r, results=FALSE, message=FALSE, warning=FALSE}
+if (!require(VennDiagram)) {
+  install.packages("VennDiagram")
+}
+library(VennDiagram)
+```
+
+Dark matter overlaps
+
+```{r}
+draw.triple.venn(
+  area1=length(genes_all_gs),
+  area2=length(genes_enr_gs),
+  area3 =length(rnk$gene),
+  n12 = length(intersect(genes_all_gs,genes_enr_gs)),
+  n13=length(intersect(genes_all_gs,rnk$gene)),
+  n23 = length(intersect(genes_enr_gs,rnk$gene)),
+  n123 = length(intersect(genes_all_gs,intersect(genes_enr_gs,rnk$gene))),
+  category = c(
+  "all genesets",
+  "all enrichment results",
+  "expression"),
+  fill = c("red","green","blue"),
+  cat.col = c("red","green","blue")
+)
+```
+
+
+Top dark matter genes
+```{r}
+genes_no_annotation <- setdiff(rnk$gene, genes_all_gs)
+ranked_gene_no_annotation <- rnk[which(rnk$gene %in% genes_no_annotation),]
+knitr::kable(ranked_gene_no_annotation[1:10,], type="html")
+```
+
+
+heatmap of any significant genes that are not annotated to any of the pathways returned in the enrichment analysis.
+```{r}
+top_hits <- output_hits$gene[output_hits$P.Value < 0.05]
+dark_matter <- setdiff(top_hits, genes_sig_enr_gs)
+dark_matter_ensembl <- output_hits$Row.names[output_hits$gene %in% dark_matter]
+heatmap_matrix_tophits <- t(scale(t(normalized_counts[which(rownames(normalized_counts) %in% dark_matter_ensembl),])))
+heatmap_col <- circlize::colorRamp2(c(min(heatmap_matrix_tophits), 0, max(heatmap_matrix_tophits)), c("blue", "white", "red"))
+heatmap <- ComplexHeatmap::Heatmap(as.matrix(heatmap_matrix_tophits),
+  cluster_rows = TRUE, show_row_dend = TRUE,
+  cluster_columns = FALSE,show_column_dend = FALSE,
+  col=heatmap_col,show_column_names = TRUE,
+  show_row_names = FALSE,show_heatmap_legend = TRUE)
+heatmap
+```
+
+heatmap of any significant genes that are not annotated to any pathways in entire set of pathways used for the analysis.
+```{r}
+top_hits <- output_hits$gene[output_hits$P.Value < 0.05]
+dark_matter <- setdiff(top_hits, genes_all_gs)
+dark_matter_ensembl <- output_hits$Row.names[output_hits$gene %in% dark_matter]
+heatmap_matrix_tophits <- t(scale(t(normalized_counts[which(rownames(normalized_counts) %in% dark_matter_ensembl),])))
+heatmap_col <- circlize::colorRamp2(c(min(heatmap_matrix_tophits), 0, max(heatmap_matrix_tophits)), c("blue", "white", "red"))
+heatmap <- ComplexHeatmap::Heatmap(as.matrix(heatmap_matrix_tophits),
+  cluster_rows = TRUE, show_row_dend = TRUE,
+  cluster_columns = FALSE,show_column_dend = FALSE,
+  col=heatmap_col,show_column_names = TRUE,
+  show_row_names = FALSE,show_heatmap_legend = TRUE)
+heatmap
+```
+
 ## References
 
+GeneSetEnrichmentAnalysisWiki. Data formats. 2020. Retrieved 2022 Apr 5 from https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats
+
+Isserlin R. Enrichment Map Analysis Pipeline. 2020. Retrieved 2022 Apr 5 from https://baderlab.github.io/Cytoscape_workflows/EnrichmentMapPipeline/Protocol2_createEM.html
+
+Merico D, Isserlin R, Stueker O, Emili A, Bader GD. Enrichment map: a network-based method for gene-set enrichment visualization and interpretation. PLoS One. 2010 Nov 15;5(11):e13984. doi: 10.1371/journal.pone.0013984. PMID: [21085593](https://pubmed.ncbi.nlm.nih.gov/21085593/); PMCID: PMC2981572.
+
+Morris JH, Apeltsin L, Newman AM, Baumbach J, Wittkop T, Su G, Bader GD, Ferrin TE. clusterMaker: a multi-algorithm clustering plugin for Cytoscape. BMC Bioinformatics. 2011 Nov 9;12:436. doi: 10.1186/1471-2105-12-436. PMID: [22070249](https://pubmed.ncbi.nlm.nih.gov/22070249/); PMCID: PMC3262844.
+
+Oesper L, Merico D, Isserlin R, Bader GD. WordCloud: a Cytoscape plugin to create a visual semantic summary of networks. Source Code Biol Med. 2011 Apr 7;6:7. doi: 10.1186/1751-0473-6-7. PMID: [21473782](https://pubmed.ncbi.nlm.nih.gov/21473782/); PMCID: PMC3083346.
+
 Rahman M, Irmler M, Keshavan S, Introna M et al. Differential Effect of SARS-CoV-2 Spike Glycoprotein 1 on Human Bronchial and Alveolar Lung Mucosa Models: Implications for Pathogenicity. Viruses 2021 Dec 17;13(12). PMID: [34960806](https://pubmed.ncbi.nlm.nih.gov/34960806/)
+
+Reimand J, Isserlin R, Voisin V, Kucera M, Tannus-Lopes C, Rostamianfar A, Wadi L, Meyer M, Wong J, Xu C, Merico D, Bader GD. Pathway enrichment analysis and visualization of omics data using g:Profiler, GSEA, Cytoscape and EnrichmentMap. Nat Protoc. 2019 Feb;14(2):482-517. doi: 10.1038/s41596-018-0103-9. PMID: [30664679](https://pubmed.ncbi.nlm.nih.gov/30664679/); PMCID: PMC6607905.
+
+Shannon P, Markiel A, Ozier O, Baliga NS, Wang JT, Ramage D, Amin N, Schwikowski B, Ideker T. Cytoscape: a software environment for integrated models of biomolecular interaction networks. Genome Res. 2003 Nov;13(11):2498-504. doi: 10.1101/gr.1239303. PMID: [14597658](https://pubmed.ncbi.nlm.nih.gov/14597658/); PMCID: PMC403769.
 
 <div id="refs"></div>
 
