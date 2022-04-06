@@ -223,10 +223,6 @@ Click on any of the enrichment maps to enlarge them.
 According to "Tools > Analyze Network", treating it as an undirected graph, there
 are 309 nodes and 1609 edges.
 
-### Manually-adjusted legible enrichment map
-
-[![Legible Cytoscape enrichment map](./cytoscape/spread.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/spread.png)
-
 ### Annotated with clusters
 
 Using AutoAnnotate on the entire network with largely default settings:
@@ -240,7 +236,21 @@ Using AutoAnnotate on the entire network with largely default settings:
 - **minimum word occurence:** 1
 - **adjacent word bonus:** 8
 
-[![Annotated Cytoscape enrichment map](./cytoscape/theme.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/theme.png)
+[![Annotated Cytoscape enrichment map](./cytoscape/annotate.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/annotate.png)
+
+### Manually-adjusted publication-ready enrichment map
+
+[![Publication-ready Cytoscape enrichment map](./cytoscape/publication.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/publication.png)
+
+### Theme network
+
+[![Theme network](./cytoscape/theme.png)](https://raw.githubusercontent.com/bcb420-2022/Kevin_Lu/main/cytoscape/theme.png)
+
+The major themes match the top results from GSEA and thresholded analysis. They fit with the model
+and show established pathways. The two major connected groups of themes are one upregulated group
+related to telomeres, mitosis, and homologous recombination, basically cell division;
+and one group related to downregulation of metabolish in the electron transport chain
+and translation, while upregulating interferons as part of the viral response.
 
 ## Interpretation and detailed view of results
 
