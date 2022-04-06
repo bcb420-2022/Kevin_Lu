@@ -6,7 +6,7 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     toc: true
-    toc_depth: 2
+    toc_depth: 3
     toc_float: true
 bibliography: A3.bib
 csl: biomed-central.csl
@@ -174,14 +174,54 @@ no equivalent in GSEA.
 
 ## Visualize your Gene set Enrichment Analysis in Cytoscape
 
-Using your results from your non-thresholded gene set enrichment analysis visualize your results in Cytoscape.
+I am using [Cytoscape 3.9.1](https://cytoscape.org/) for Windows 64-bit. Through
+the App Manager, I installed EnrichmentMap Pipeline Collection 1.1.0, which also
+installs the following apps (also cited in [the references](#references)):
+
+- clusterMaker2 2.2
+- AutoAnnotate 1.3.5
+- EnrichmentMap 3.3.3
+- WordCloud 3.1.4
+- NetworkAnalyzer 4.4.8
+- FileTransfer 1.2
+- cyChart 0.3.1
+
+The following files were copied to a separate Windows folder, since I am running
+Docker in Windows Subsystem for Linux 2 and not mounting a Windows folder.
+
+- `Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt`
+- `GSEA_GSE185657.rnk` produced by this notebook and input to GSEA
+- the entire [`edb`](https://github.com/bcb420-2022/Kevin_Lu/tree/main/A3.GseaPreranked.1649192025218/edb)
+  directory from GSEA output
+
+The following command was executed in Cytoscape's command line, with all specified
+paths prefixed with the absolute path of the containing Windows directory,
+backslashes escaped. This command and the specified thresholds were obtained from
+[these course notes](https://baderlab.github.io/Cytoscape_workflows/EnrichmentMapPipeline/Protocol2_createEM.html).
 
 ```cytoscape
-enrichmentmap build analysisType="gsea" gmtFile=Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt pvalue=0.05 qvalue=0.25 similaritycutoff=0.375 coefficients=COMBINED ranksDataset1=edb/GSEA_GSE185657.rnk enrichmentsDataset1=edb/results.edb filterByExpressions=false expressionDataset1=GSEA_GSE185657.rnk
+enrichmentmap build analysisType="gsea" gmtFile="Human_GOBP_AllPathways_no_GO_iea_April_01_2022_symbol.gmt" pvalue=0.05 qvalue=0.25 similaritycutoff=0.375 coefficients=COMBINED ranksDataset1="edb\\GSEA_GSE185657.rnk" enrichmentsDataset1="edb\\results.edb" filterByExpressions=false expressionDataset1="GSEA_GSE185657.rnk"
 ```
 
-309 nodes
-1609 edges
+To make it more explicit from that command, the thresholds used are:
+
+- pvalue = 0.05
+- qvalue = 0.25
+- similaritycutoff = 0.375
+- coefficients = COMBINED
+
+### Initial enrichment map
+
+![Initial Cytoscape enrichment map](./cytoscape/initial.png)
+
+**Legend:**
+
+![Legend for all enrichment maps](./cytoscape/legend.png)
+
+According to "Tools > Analyze Network", treating it as an undirected graph, there
+are 309 nodes and 1609 edges.
+
+
 
 default settings
 - clusterMaker
